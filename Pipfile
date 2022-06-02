@@ -5,3 +5,6 @@ name = "pypi"
 
 [packages]
 pika = "*"
+
+[scripts]
+ssl_client = 'python ssl_client.py'
