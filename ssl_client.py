@@ -26,7 +26,7 @@ def do_work(i):
         context = ssl.create_default_context()
         context.verify_mode = ssl.CERT_REQUIRED
         context.load_verify_locations(cafile="./certs/ca_certificate.pem")
-        context.load_cert_chain(certfile="./certs/client_shostakovich_certificate.pem",keyfile="./certs/client_shostakovich_key.pem")
+        context.load_cert_chain(certfile="./certs/client_wildcard.local_certificate.pem",keyfile="./certs/client_wildcard.local_key.pem")
 
         thread_id = threading.get_ident()
         LOGGER.info("i: %s thread id: %s", i, thread_id)
@@ -34,7 +34,7 @@ def do_work(i):
         # p = 5682 + (i % 3)
         p = 5671
         parameters = pika.ConnectionParameters(
-            host="shostakovich",
+            host="localhost",
             port=p,
             credentials=credentials,
             heartbeat=5,
