@@ -1,16 +1,13 @@
-FROM rabbitmq:3-management
-
-# RUN apt-get clean && \
-#     apt-get update && \
-#     apt-get upgrade --yes --fix-broken --fix-missing --verbose-versions && \
-#     apt-get install --yes --fix-broken --fix-missing --verbose-versions --no-install-recommends \
-#       dnsutils inetutils-ping iproute2
+FROM pivotalrabbitmq/rabbitmq:osiris-78-otp-max
 
 RUN mkdir -p /etc/rabbitmq/certs
 RUN chown rabbitmq:rabbitmq /etc/rabbitmq/certs
 
+COPY --chown=rabbitmq:rabbitmq --chmod=0400 ./certs/ca_certificate.pem /etc/rabbitmq/certs
 COPY --chown=rabbitmq:rabbitmq --chmod=0400 ./certs/server_wildcard.local_certificate.pem /etc/rabbitmq/certs
 COPY --chown=rabbitmq:rabbitmq --chmod=0400 ./certs/server_wildcard.local_key.pem /etc/rabbitmq/certs
+COPY --chown=rabbitmq:rabbitmq --chmod=0400 ./certs/client_wildcard.local_certificate.pem /etc/rabbitmq/certs
+COPY --chown=rabbitmq:rabbitmq --chmod=0400 ./certs/client_wildcard.local_key.pem /etc/rabbitmq/certs
 
 COPY --chown=rabbitmq:rabbitmq --chmod=0400 erlang.cookie /var/lib/rabbitmq/.erlang.cookie
 COPY --chown=rabbitmq:rabbitmq --chmod=0600 enabled_plugins /etc/rabbitmq/
