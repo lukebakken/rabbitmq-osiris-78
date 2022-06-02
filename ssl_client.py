@@ -6,6 +6,7 @@ import threading
 import pika
 import random
 import ssl
+import time
 
 LOG_FORMAT = (
     "%(levelname) -10s %(asctime)s %(name) -30s %(funcName) "
@@ -13,7 +14,7 @@ LOG_FORMAT = (
 )
 LOGGER = logging.getLogger(__name__)
 
-logging.basicConfig(level=logging.ERROR, format=LOG_FORMAT)
+logging.basicConfig(level=logging.INFO, format=LOG_FORMAT)
 
 stopping = False
 
@@ -26,7 +27,10 @@ def do_work(i):
         context = ssl.create_default_context()
         context.verify_mode = ssl.CERT_REQUIRED
         context.load_verify_locations(cafile="./certs/ca_certificate.pem")
-        context.load_cert_chain(certfile="./certs/client_wildcard.local_certificate.pem",keyfile="./certs/client_wildcard.local_key.pem")
+        context.load_cert_chain(
+            certfile="./certs/client_wildcard.local_certificate.pem",
+            keyfile="./certs/client_wildcard.local_key.pem",
+        )
 
         thread_id = threading.get_ident()
         LOGGER.info("i: %s thread id: %s", i, thread_id)
@@ -41,20 +45,23 @@ def do_work(i):
             ssl_options=pika.SSLOptions(context),
         )
         connection = pika.BlockingConnection(parameters)
-        #for i in range(1, random.randrange(5, 10)):
-        #    connection.channel()
-        connection.sleep(random.randrange(5, 10))
+        connection.sleep(random.randrange(1, 5))
         connection.close()
 
 
-for i in range(0, 1):
-    t = threading.Thread(target=do_work, args=(i,))
-    t.start()
-    threads.append(t)
+try:
+    print("ANY KEY TO STOP")
+    time.sleep(1)
+    for i in range(0, 4):
+        t = threading.Thread(target=do_work, args=(i,))
+        t.start()
+        threads.append(t)
+    input("...")
+    stopping = True
+except KeyboardInterrupt:
+    stopping = True
 
-input("ANY KEY TO STOP")
-print()
-stopping = True
-# Wait for all to complete
+LOGGER.info("STOPPING!")
+
 for thread in threads:
     thread.join()
