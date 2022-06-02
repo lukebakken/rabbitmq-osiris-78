@@ -1,0 +1,61 @@
+version: '3'
+
+networks:
+  rabbitnet:
+    name: rabbitnet
+    driver: bridge
+
+services:
+  rmq0:
+    image: osiris-78:latest
+    hostname: rmq0
+    networks:
+      rabbitnet:
+        aliases:
+          - rmq0.local
+    environment:
+      - LOG=debug
+    volumes:
+      - ./data/rmq0:/var/lib/rabbitmq/mnesia
+      - ./log/rmq0:/var/log/rabbitmq
+  rmq1:
+    image: osiris-78:latest
+    hostname: rmq1
+    networks:
+      rabbitnet:
+        aliases:
+          - rmq1.local
+    environment:
+      - LOG=debug
+    volumes:
+      - ./data/rmq1:/var/lib/rabbitmq/mnesia
+      - ./log/rmq1:/var/log/rabbitmq
+  rmq2:
+    image: osiris-78:latest
+    hostname: rmq2
+    networks:
+      rabbitnet:
+        aliases:
+          - rmq2.local
+    environment:
+      - LOG=debug
+    volumes:
+      - ./data/rmq2:/var/lib/rabbitmq/mnesia
+      - ./log/rmq2:/var/log/rabbitmq
+  haproxy:
+    image: haproxy:latest
+    networks:
+      rabbitnet:
+        aliases:
+          - haproxy.local
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    depends_on:
+      - rmq0
+      - rmq1
+      - rmq2
+    ports:
+      # HOST:CONTAINER
+      - 15672:15672
+      - 5672:5672
+      - 5671:5671
